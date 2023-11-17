@@ -1,6 +1,6 @@
 pandas
 numpy
-wordnijna
+wordninja
 seaborn
 scikit-learn
 tensorflow
