@@ -1,0 +1,7 @@
+pandas
+numpy
+wordnijna
+seaborn
+scikit-learn
+tensorflow
+
