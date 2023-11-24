@@ -29,11 +29,23 @@ min_topic_count = 100
 topics = topics_to_vectors(df, min_topic_count).values
 print(topics.shape)
 
+# remove lines with no topics
+mask = topics.sum(axis=1) != 0
+topics = topics[mask]
+vectors = vectors[mask]
+df = df[mask]
+
 
 # Model
 
 VOCAB_SIZE = len(vocab_map)
 INPUT_SIZE = max_words
+
+model_simple = models.Sequential([
+    layers.Dense(256, input_shape=(vectors.shape[1], )),
+    layers.Dropout(0.2),
+    layers.Dense(topics.shape[1], activation="softmax")
+])
 
 model_gru = models.Sequential([
     layers.Embedding(input_dim=VOCAB_SIZE, output_dim=256, input_length=INPUT_SIZE),
@@ -44,14 +56,27 @@ model_gru = models.Sequential([
     layers.Dense(topics.shape[1], activation="softmax")
 ])
 
+model_gru_small = models.Sequential([
+    layers.Embedding(input_dim=VOCAB_SIZE, output_dim=64, input_length=INPUT_SIZE),
+    layers.Dropout(0.5),
+    layers.GRU(64, return_sequences=True),
+    layers.GRU(32, return_sequences=True),
+    layers.Flatten(),
+    layers.Dense(topics.shape[1], activation="softmax")
+])
+
 model_dense = models.Sequential([
-    layers.Dense(256, kernel_regularizer=regularizers.l1(0.001), activation='relu', input_shape=(vectors.shape[1],)),
-    layers.Dense(256, kernel_regularizer=regularizers.l1(0.001), activation='relu'),
+    layers.Dense(256, kernel_regularizer=regularizers.L1L2(), activation='relu', input_shape=(vectors.shape[1],)),
+    layers.Dropout(0.5),
+    layers.Dense(256, kernel_regularizer=regularizers.L1L2(), activation='relu'),
+    layers.Dropout(0.5),
+    layers.Dense(64, kernel_regularizer=regularizers.L1L2(), activation='relu'),
+    layers.Dropout(0.2),
     layers.Dense(topics.shape[1], activation="softmax")
 ])
 
 
-model = model_dense
+model = model_gru_small
 
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics='accuracy')
 model.summary()
@@ -65,7 +90,7 @@ print(y_test.shape)
 model.evaluate(x_test, y_test)
 
 
-history = model.fit(x_train, y_train, epochs=25, batch_size=128, validation_data=(x_test, y_test))
+history = model.fit(x_train, y_train, epochs=20, batch_size=64, validation_data=(x_test, y_test))
 
 
 def plot_learning_curves(history, title=""):
