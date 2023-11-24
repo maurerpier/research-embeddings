@@ -1,1 +1,5 @@
 .ipynb_checkpoints/*
+*.npy
+*.png
+*.csv
+__pycache__/*
