@@ -4,7 +4,7 @@ import string
 import wordninja
 from time import time
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from sklearn.preprocessing import MultiLabelBinarizer
 
 def process_dataset(path, processed_path=""):
     # load data
@@ -22,14 +22,17 @@ def process_dataset(path, processed_path=""):
     df["topics"] = df["topics"].replace('[\',]', '', regex=True)
     for idx, row in df.iterrows():
         topics = df["topics"][idx][1:-1].split()
-        df.loc[idx, "topics"] = topics[0]
-        if len(topics) > 1:
-            df.loc[idx, "multi-topic"] = True
-    df["multi-topic"].fillna(False, inplace=True)
+        df.loc[idx, "topics"] = ' '.join(topics)
     df = df.reset_index(drop=True)
     if processed_path:
         df.to_csv(processed_path, index=False)
     return df
+
+def topics_to_vectors(df, min_count_topic):
+    topics = df["topics"].apply(str.split, args=(' '))
+    mlb = MultiLabelBinarizer(sparse_output=True)
+    topics_encoded = pd.DataFrame.sparse.from_spmatrix(mlb.fit_transform(topics), index=df.index, columns=mlb.classes_)
+    return topics_encoded[topics_encoded.columns[topics_encoded.sum(axis=0) >= 100]]
 
 def tokenize(string, word_level=True, consecutative_tokens=1):
     if word_level:
@@ -67,7 +70,7 @@ def vectorize_df(df):
     tokens = df["text"].apply(tokenize)
     vocab_map, vocab = vocabulary(tokens)
     max_length = tokens.apply(len).max()
-    vectors = vectorize(tokens, vocab_map, True, max_length)
+    vectors = vectorize(df["text"], vocab_map, True, max_length)
     return vectors
 
 
@@ -78,6 +81,8 @@ if __name__ == "__main__":
     # df = process_dataset(dataset_path, processed_path)
 
     df = pd.read_csv(processed_path)
-    max_words = 400
-    df = df[(df["text"].apply(tokenize).apply(len) <= max_words)]
-    vectors = vectorize_df(df)
+    # max_words = 400
+    # df = df[(df["text"].apply(tokenize).apply(len) <= max_words)]
+    # vectors = vectorize_df(df)
+
+    # topics = topics_to_vector(df, 100)
