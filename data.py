@@ -71,7 +71,7 @@ def vectorize_df(df):
     vocab_map, vocab = vocabulary(tokens)
     max_length = tokens.apply(len).max()
     vectors = vectorize(df["text"], vocab_map, True, max_length)
-    return vectors
+    return vectors, vocab_map
 
 
 if __name__ == "__main__":
