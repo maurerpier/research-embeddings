@@ -64,10 +64,10 @@ def vectorize(sentances, vocab_map, word_level, max_length=100):
     return vectors
 
 def vectorize_df(df):
-    df["tokens"] = df["text"].apply(tokenize)
-    vocab_map, vocab = vocabulary(df["tokens"])
-    max_length = df["tokens"].apply(len).max()
-    vectors = vectorize(df["text"], vocab_map, True, max_length)
+    tokens = df["text"].apply(tokenize)
+    vocab_map, vocab = vocabulary(tokens)
+    max_length = tokens.apply(len).max()
+    vectors = vectorize(tokens, vocab_map, True, max_length)
     return vectors
 
 
