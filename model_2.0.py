@@ -75,10 +75,19 @@ model_dense = models.Sequential([
     layers.Dense(topics.shape[1], activation="softmax")
 ])
 
+model_dense_embed = models.Sequential([
+    layers.Embedding(input_dim=VOCAB_SIZE, output_dim=512, input_length=INPUT_SIZE),
+    layers.Flatten(),
+    layers.Dense(1024, kernel_regularizer=regularizers.L1L2(), activation='relu'),
+    layers.Dense(256, kernel_regularizer=regularizers.L1L2(), activation='relu'),
+    layers.Dense(topics.shape[1], activation="softmax")
+])
 
-model = model_gru_small
 
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics='accuracy')
+model = model_dense_embed
+
+# model.compile(optimizer='adam', loss='categorical_crossentropy', metrics='accuracy')
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 model.summary()
 
 

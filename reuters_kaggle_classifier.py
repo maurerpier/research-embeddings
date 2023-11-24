@@ -144,7 +144,6 @@ history_dict.keys()
 
 # VALIDATION LOSS curves
 
-plt.clf()
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 epochs = range(1, len(loss) + 1)
@@ -162,7 +161,6 @@ plt.show()
 
 ## VALIDATION ACCURACY curves
 
-plt.clf()
 acc = history.history['acc']
 val_acc = history.history['val_acc']
 plt.plot(epochs, acc, 'bo', label='Training acc')
@@ -243,8 +241,6 @@ print(Top3Preds.shape)
 for SampleNum in range(predictions.shape[0]):
     Top3Preds[SampleNum] = predictions[SampleNum].argsort()[-3:][::-1]
     
-Top3Preds
-
 
 # In[18]:
 
@@ -258,8 +254,6 @@ for SampleNum in range(Top3Preds.shape[0]):
     if test_labels[SampleNum] in Top3Preds[SampleNum]:
         FinalPreds[SampleNum] = 1
         
-FinalPreds
-
 
 # In[19]:
 
